@@ -51,33 +51,24 @@ class LoginComponent extends Component {
     }
 
     handleLogin = async (username, password, event) => {  
-        if (username === 'file') {
-            try {
-                const dir = await fs.readdir('~/git/cali24');
-                for await (const dirent of dir)
-                  console.log(dirent.name);
-              } catch (err) {
-                console.error(err);
-              }
-        } else {  
-            if (this.validLogin(username, password)) {
-                event.preventDefault();
-                //build login payload
-                const url = process.env.REACT_APP_API_URL || 'http://18.191.225.26:8181';
-                const loginUrl = url+"/notes";
-                const userToken = "Basic "+base64.encode(username+":"+password)
-                var response = FetchUtil.handleGet(loginUrl, userToken);
-                response
-                .then(response => response.json())
-                .then(json => {
-                    console.log("LoginComponent handleClick() response");
-                    this.handleLoginSuccess(json, userToken);
-                })    
-                .catch((error) => {
-                    this.handleLoginError('Login failed. Please try again.');
-                });
-            }
+        if (this.validLogin(username, password)) {
+            event.preventDefault();
+            //build login payload
+            const url = import.meta.env.VITE_API_URL || 'http://18.191.225.26:8181';
+            const loginUrl = url+"/notes";
+            const userToken = "Basic "+base64.encode(username+":"+password)
+            var response = FetchUtil.handleGet(loginUrl, userToken);
+            response
+            .then(response => response.json())
+            .then(json => {
+                console.log("LoginComponent handleClick() response");
+                this.handleLoginSuccess(json, userToken);
+            })    
+            .catch((error) => {
+                this.handleLoginError('Login failed. Please try again.');
+            });
         }
+    
     } //end handleClick()
 
     render() {

@@ -39,16 +39,16 @@ class NoteComponent extends Component {
     handleValidationAndSubmit = (note, e) => {
         console.log('stop here');
         if (this.validNote(note)) {
-            this.props.handleNoteSubmit(note, e);
+            this.props.handleNoteSubmit(note, e, this.props.actionType);
         }
     };
 
     validNote = (note) => {
-        if (!note.category && !note.noteText) {
-            this.handleError('Please provide Category and text input');
+        if (!note.directory && !note.noteText) {
+            this.handleError('Please provide Directory and text input');
             return false;
-        } else if (!note.category) {
-            this.handleError('Please select a category.');    
+        } else if (!note.directory) {
+            this.handleError('Please select a directory.');    
         } else if (!note.noteText) {
             this.handleError('Please enter note text');
         }else {
@@ -64,7 +64,7 @@ class NoteComponent extends Component {
             <div>       
                 <div>     
                     <NoteFormDialog 
-                        categoryList={this.props.categoryList}
+                        directoryList={this.props.directoryList}
                         handleError={this.handleError}
                         openNote={this.props.openNote} 
                         error={this.state.error} 

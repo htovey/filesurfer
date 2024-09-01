@@ -12,6 +12,29 @@
     return result;
 }
 
+const handleNewGet = async (url, params, userToken) => {
+    url = new URL(url);
+    if (params) {
+        url.search = new URLSearchParams(params).toString();
+    }
+    let response = await fetch(url, {
+        method: "GET",
+        headers: {
+            "Content-Type" : "application/json",
+            "Accept": "application/json",
+            "Authorization" : userToken
+        }
+    });
+    if (response.ok) {
+        return await response.json();
+    } else {
+        let tokenError = response.headers.get('Tokenerror');
+        let respError = response.statusText == '' ? 'Request failed.' : response.statusText;
+        return { "error": tokenError ? tokenError : respError, "payload": {}}
+    }
+}
+
+
 const handlePost = (url, userToken, payload) => {
    var result = fetch( url, {
         method: "POST",
@@ -26,4 +49,4 @@ const handlePost = (url, userToken, payload) => {
     return result;
 }
 
-export default {handleGet, handlePost}
+export default {handleGet, handleNewGet, handlePost}

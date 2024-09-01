@@ -10,110 +10,85 @@ import { MenuItem, FormControl } from '@mui/material';
 import Select from '@mui/material/Select';
 import WaitModalComponent from '../modals/WaitModalComponent';
 
-export default class NoteFormDialog extends Component {
+export default function NoteFormDialog (props) {  
 
-  constructor(props) {
-    super(props);
-    this.state={
-      categoryInput: '',
-      noteTextInput: '',
-      placeHolder: '',
-      categoryList: this.buildCategoryList(),
-    }
-   }
+  const [directoryInput, setDirectoryInput] = useState();
+  const [noteTextInput, setNoteTextInput] = useState('');
 
-  buildCategoryList = () => {
-    let catList = this.props.categoryList.map(function(category, i) {
-      if (category.value === '') {
-      return <MenuItem classes={{"root": "disabledItem"}} disabled key={category.value} value={category.value}>{category.label}</MenuItem>
+   const directoryList = props.directoryList.map(function(directory, i) {
+      if (directory.value === '') {
+      return <MenuItem classes={{"root": "disabledItem"}} disabled key={i} value={directory}>{directory}</MenuItem>
       }
-       return <MenuItem key={category.value} value={category.value}>{category.label}</MenuItem>
+       return <MenuItem key={i} value={directory}>{directory}</MenuItem>
     });
-    return catList;
-  } 
+   
 
-  getCategoryValue = () => { 
-    let val = '';
-    let stateCat = this.state.categoryInput;
-    let modelCat = this.props.noteModel.category;
-    if(stateCat !== '') {
-      //always use state value if it has been set
-      val = stateCat;
-    } else if (modelCat) {
-      //use model value when editing existing note, where state has not been set
-      val = modelCat;
-    }
-    //return default empty value if neither state nor model has been set 
-    console.log('set cat val to: '+val);
-    return val;
-  }
 
-  getCategoryStyleClass = () => {
-    if (this.state.categoryInput === '' && !this.props.noteModel.category) {
+  const getDirectoryStyleClass = () => {
+    if (directoryInput === '' && !props.noteModel.directory) {
       return "disabledItem";
     } else {
       return "selectedItem";
     }
   }
  
-  handleSubmit = (e) => {
+  const handleSubmit = (e) => {
       e.preventDefault();
-      var note = this.populateNoteModel();
-      this.props.handleNoteValSubmit(note, e);  
+      var note = populateNoteModel();
+      props.handleNoteValSubmit(note, e);  
   }
 
-  handleSelect = (e) => {
-    this.setState({ categoryInput: e.target.value });   
+  const handleSelect = (e) => {
+    setDirectoryInput(e.target.value);
   }
 
-  handleCancel = () => {
-   // this.resetFormState();
+  const handleCancel = () => {
+   // resetFormState();
     console.log('handleCancel');
-    return this.props.handleClose();
+    return props.handleClose();
   }
 
-  populateNoteModel = () => {
-    var noteModel = this.props.noteModel;
+  const populateNoteModel = () => {
+    var noteModel = props.noteModel;
     
-    if (this.state.categoryInput) {
-      noteModel.category = this.state.categoryInput;
+    if (directoryInput) {
+      noteModel.directory = directoryInput;
     }
 
-    if (this.state.noteTextInput) {
-      noteModel.noteText = this.state.noteTextInput;
+    if (noteTextInput !== '') {
+      noteModel.noteText = noteTextInput;
     }  
 
     return noteModel;
   }
   
-  render () {
   //  const StyledContent = withStyles({root: {color : 'red'}})(DialogContentText);
     return (
      
         <Dialog 
-          open={this.props.openNote}
+          open={props.openNote}
           maxWidth="md"
           aria-labelledby="form-dialog-title">
           <DialogContent className={"noteDialog"}>
-
+            <span>{props.error}</span>
             <Select
-              value={this.getCategoryValue()}
+              value={props.noteModel.directory || directoryInput || ''}
               displayEmpty
-              onChange={ (e) => this.handleSelect(e) }
-              name="category"
-              className={this.getCategoryStyleClass()}
+              onChange={ (e) => handleSelect(e) }
+              name="directory"
+              className={getDirectoryStyleClass()}
               variant="outlined"
               margin="dense"
               required
               fullWidth
             >
-              {this.state.categoryList}
+              {directoryList}
             </Select>    
              <CustomTextField
               name="noteText"
               required
-              defaultValue={this.props.noteModel.noteText || ''}
-              onChange={(e) => this.setState({noteTextInput: e.target.value})}
+              defaultValue={props.noteModel.noteText || ''}
+              onChange={(e) => setNoteTextInput(e.target.value)}
               label="Note"
               multiline
               rows="15"
@@ -121,15 +96,15 @@ export default class NoteFormDialog extends Component {
          
           </DialogContent>
           <DialogActions>
-            <Button onClick={this.handleSubmit} color="primary">
+            <Button onClick={handleSubmit} color="primary">
                 Save
             </Button>
-            <Button onClick={this.handleCancel}>
+            <Button onClick={handleCancel}>
                 Cancel
             </Button>
           </DialogActions>
         </Dialog>
        
     );
-    }
+    
   }

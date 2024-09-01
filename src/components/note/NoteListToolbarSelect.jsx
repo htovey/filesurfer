@@ -36,7 +36,7 @@ class NoteListToolbarSelect extends Component {
 
     handleDelete = () => {
         this.setState({loading: true});
-        const baseUrl = process.env.REACT_APP_API_URL || 'http://18.191.225.26:8181';
+        const baseUrl = import.meta.env.VITE_API_URL || 'http://18.191.225.26:8181';
         var url = baseUrl+"/delete";
         var body = this.getNoteIdList(this.props.selectedRows)
         var result = FetchUtil.handlePost(url, this.props.userToken, body)

@@ -23,7 +23,7 @@ const defaultToolbarStyles = {
 class NoteListToolbar extends Component {
     
     handleDelete = () => {
-        const baseUrl = process.env.REACT_APP_API_URL || 'http://18.191.225.26:8181';
+        const baseUrl = import.meta.env.VITE_API_URL || 'http://18.191.225.26:8181';
         var url = baseUrl+"/delete";
         var body = this.getNoteIdList(this.props.selectedRows)
         var result = FetchUtil.handlePost(url, this.props.userToken, body)
@@ -41,7 +41,7 @@ class NoteListToolbar extends Component {
     }
 
     handleUpdate = () => {
-        const baseUrl = process.env.REACT_APP_API_URL || 'http://18.191.225.26:8181';
+        const baseUrl = import.meta.env.VITE_API_URL || 'http://18.191.225.26:8181';
         var url = baseUrl+"/note";
         var body = this.getNotePayload(this.props.selectedRows)
         var result = FetchUtil.handlePost(url, this.props.userToken, body)

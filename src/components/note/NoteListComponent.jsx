@@ -1,107 +1,160 @@
-import React from 'react';
-import MUIDataTable from 'mui-datatables';
-import NoteListToolbarSelect from './NoteListToolbarSelect';
-import { createMuiTheme } from '@mui/material/styles';
-import { StayPrimaryLandscape } from '@mui/icons-material';
-import NoteListToolbar from './NoteListToolbar';
+import React, { useState } from 'react';
+import DataGrid from '../datagrid/DataGrid';
 
 export default function NoteListComponent(props) {
     const columns = [
         {
-            name: "noteId",
-            label: "Note Id",
+            field: "checkbox",
+            headerName: ""
+        },
+        {
+            field: "noteId",
+            headerName: "Note Id",
             options: {
                 display: 'excluded'
             }
         },
         {
-            name: "category",
-            label: "Category",
+            field: "directory",
+            headerName: "Directory",
             options: {
                 filter: true
             }
         },
         {
-            name: "noteText",
-            label: "Note",
+            field: "noteText",
+            headerName: "Note",
             options: {
                 filter: true,
                 setCellProps: value => ({ style: { width: '75%' } }),
             }
         },
         {
-            name: "lastUpdated",
-            label: "Last Updated",
+            field: "lastUpdated",
+            headerName: "Last Updated",
             options: {
                 filter: true
             }
         }
     ];
 
-    const options = {
-        filter: true,
-        filterType: "dropdown",
-        responsive: "vertical",
-        selectableRows: true,
-        selectToolbarPlacement: "above",
-        customToolbarSelect: (selectedRows, displayData, setSelectedRows) => (
-            <NoteListToolbarSelect 
-                className={"selectToolbar"}
-                selectedRows={selectedRows}
-                noteList={props.notes}
-                getNoteFormData={props.getNoteFormData}
-                userToken={props.userToken}
-                handleSuccess={props.handleSuccess}
-                setSelectedRows={setSelectedRows}
-                displayData={displayData}/>
-        )
-      };
+    const headerRow = columns.map(c => {
+        return {
+            field: c.headerName,
+            headerName: c.headerName
+        }
+    });
 
-    const getMuiTheme = createMuiTheme({
-        overrides: {
-            MUIDataTable: {
-            root: {
-                backgroundColor: 'purple',
-            },
-            paper: {
-                boxShadow: 'none',
-            },
-            },
-            MUIDataTableToolbarSelect: {
-               root: {
-                    backgroundColor: 'orange',
-               },
-            },
-            MuiTableCell: {
-            head: {
-                backgroundColor: 'purple',
-            },
-            },
-            MUIDataTableSelectCell: {
-            headerCell: {
-                backgroundColor: 'inherit',
-            },
-            },
-            MuiTableFooter: {
-            root: {
-                '& .MuiToolbar-root': {
-                backgroundColor: 'white',
-                },
-            },
-            },
-            MuiPaper: {
-                backgroundColor: 'red'
+    const toolbarStyles = {
+        backgroundColor: 'lightGray',
+        marginLeft: '5px', 
+        marginRight: '5px',
+        marginTop: '10px',
+        height: '75px'
+    };  
+
+    const searchStyles = {
+        marginRight: 0,
+        marginLeft: 'auto',
+        marginTop: '5px',
+        marginBottom: '5px',
+        display: 'flex',
+        backgroundColor: 'white',
+        height: '50px'
+    }
+
+    const [selectedRows, setSelectedRows] = useState({data: []});
+
+
+    ///// CRUD OPERATIONS ////
+    const create = () => {
+        props.setActionType('CREATE');
+        props.setShowNoteForm(true);
+    };
+
+    const edit = (selectedRows) => {
+        let note = selectedRows.data[0];
+        props.getNoteFormData(note);
+        props.setActionType('UPDATE');
+        updateCheckbox(note.id);
+        setSelectedRows({ data: [] });
+    };
+
+    const updateCheckbox = (id) => {
+        props.noteList.map((g, i) => {
+            if (g.id === id) {
+                g.checked = !g.checked;
             }
-        },
-        });  
-    
+        });
+    };
+    const getIdList = (selectedRows) => {
+        let deleteArray = [];
+        selectedRows.data.map((selected, index) => {
+             deleteArray[index] = selected.id;
+        });
+        return deleteArray;
+    }
+
+    const deleteNotes = (selectedRows) => {
+        handleDelete(selectedRows);
+        setSelectedRows({ data: [] });
+    }
+  
+    const handleDelete = (selectedRows) => {
+        // this.setState({loading: true});
+        var url = '/delete';
+        var payload = getIdList(selectedRows)
+        // eslint-disable-next-line no-unused-vars
+       // props.setLoading(true);
+        var result = FetchUtil.handlePost(url, props.userToken, JSON.stringify(payload))
+        .then(response => {
+            if (response.status === 200) {
+                //this.setState({loading : false});
+                console.log('Delete: Success***');
+                props.handleSuccess('DELETE', 'ASSET');
+                //resetRows();
+            }
+        })    
+        .catch((error) => {
+            console.log(error);
+           // this.handleError('Delete failed. Please try again later.');
+        });
+    }
+
+    const gridOptions = {
+        searchStyles: searchStyles,
+        toolbarStyles: toolbarStyles,
+        cellClass: 'grid-cell',
+        columnClass: 'grid-column',
+        headerClass: 'column-header',
+        rowClass: 'grid-row',
+        add: create,
+        edit: edit,
+        delete: deleteNotes,
+        editTooltip: 'Edit Note',
+        deleteTooltip: 'Delete Note',
+        addTooltip: 'Create Note',
+        showLaunch: false,
+        title: 'Notes'
+    }
 
     return (
-
-            <MUIDataTable 
-                data={props.notes}
+            <DataGrid  
+                cellClass="grid-column grid-cell"
+                checkboxClass="box"
+                columnClass="grid-column"
                 columns={columns}
-                options={options}     
+                gridClass="container"
+                handleSucces={props.handleSucces}
+                headerClass="column-header"
+                headerRowData={headerRow}
+                noData={"no existing Notes"}
+                gridOptions={gridOptions}
+                rows={props.notes}
+                rowClass="grid-row"
+                setSelectedRows={setSelectedRows}
+                selectedRows={selectedRows}
             />
-    );
+
+    )
 }

@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import './styles/App.css';
+import './App.css';
 import { AppBar } from '@mui/material';
 import LoginComponent from './components/login/LoginComponent';
 import NoteComponent from './components/note/NoteComponent';
@@ -37,14 +38,18 @@ class App extends Component {
         id: '',
         label: '',
         value: ''
-      }
+      },
     }
+  }
+
+  setActionType = (type) => {
+    this.setState({actionType: type});
   }
 
   handleCategorySubmit = (category, event) => {
     event.preventDefault();
     //build note payload
-    const url = process.env.REACT_APP_API_URL || 'http://18.191.225.26:8181';
+    const url = import.meta.env.VITE_API_URL || 'http://18.191.225.26:8181';
     const categoryUrl = url+"/category"
     const categoryBody =  {
         "id": category.id === ''? null: category.id,
@@ -64,14 +69,14 @@ class App extends Component {
         }); 
   }
 
-  handleNoteSubmit = (note, event) => {
+  handleNoteSubmit = (note, event, actionType) => {
     event.preventDefault();
     //build note payload
-    const url = process.env.REACT_APP_API_URL || 'http://18.191.225.26:8181';
-    const noteUrl = url+"/note"
+    const url = import.meta.env.VITE_API_URL || 'http://18.191.225.26:8181';
+    const noteUrl = url+"/"+actionType.toLowerCase();
     const noteBody =  {
         "noteId": note.noteId,
-        "category": note.category,
+        "directory": note.directory,
         "noteText": note.noteText
     }
     this.setState({loading: true});
@@ -128,7 +133,7 @@ class App extends Component {
     
   refreshNoteList = () => {
     console.log("refreshNoteList()");
-    const baseUrl = process.env.REACT_APP_API_URL || 'http://18.191.225.26:8181';
+    const baseUrl = import.meta.env.VITE_API_URL || 'http://18.191.225.26:8181';
     var url = baseUrl+"/notes";
     var result = FetchUtil.handleGet(url, this.state.userToken);
     result
@@ -182,11 +187,11 @@ class App extends Component {
     } else {
       this.setState({actionType: "create"});
     }
-    await this.getCategoryList();
+    await this.getDirectoryList();
   }
 
   getCategoryList = async () => {
-    const baseUrl = process.env.REACT_APP_API_URL || 'http://18.191.225.26:8181';
+    const baseUrl = import.meta.env.VITE_API_URL || 'http://18.191.225.26:8181';
     var url = baseUrl+"/categories";
     var result = FetchUtil.handleGet(url, this.state.userToken);
     result
@@ -257,17 +262,36 @@ class App extends Component {
     });
   } 
 
+  getDirectoryList = async () => {
+    const url = import.meta.env.VITE_API_URL || 'http://18.191.225.26:8181';
+    const directoryUrl = url+"/directoryListing";
+    let params = { "folderName" : "/Users/heather" }; 
+    let directories = await FetchUtil.handleNewGet(directoryUrl, params, this.state.userToken);
+    if (directories.error) {
+      this.handleError('womp womp');
+    } else {
+      this.setState({directoryList: directories});
+    }
+  }
+
+  setShowNoteForm = async (value) => {
+    if (value == true) {
+      await this.getDirectoryList();
+    }
+    this.setState({openNote: value});
+  }
+
   render() {
     return (
  
         <div className="App">
-          <AppBar title="Nerd Notes" showMenuIconButton={false} className={"AppBar"}>
-            <Tooltip title="Add Note" aria-label="add">
+          <AppBar title="Nerd Notes" className={"hideMe"}>
+            {/* <Tooltip title="Add Note" aria-label="add">
               <AddCircleIcon onClick={this.getNoteFormData} className={"addNoteIcon"}/>
             </Tooltip>
             <Tooltip title="Add Category" aria-label="add-category">
               <Button onClick={this.createNewCategory} children={"Add Category"} className={"addCategoryIcon"}/>
-            </Tooltip>
+            </Tooltip> */}
           </AppBar> 
           <CustomSnackBar 
             open={this.state.snackBarOpen} 
@@ -283,15 +307,18 @@ class App extends Component {
             />}   
           {this.state.showNoteList && 
             <NoteListComponent 
-              handleSuccess={this.handleCRUDSuccess} 
-              userToken={this.state.userToken} 
-              notes={this.state.noteList}
-              setSelectedRows={this.setSelectedRows}
               getNoteFormData={this.getNoteFormData}
+              handleSuccess={this.handleCRUDSuccess} 
+              notes={this.state.noteList}
+              setActionType={this.setActionType}
+              setSelectedRows={this.setSelectedRows}
+              userToken={this.state.userToken} 
+              setShowNoteForm={this.setShowNoteForm}
             />}    
           {this.state.openNote &&
-            <NoteComponent 
-              categoryList={this.state.categoryList}
+            <NoteComponent
+              actionType={this.state.actionType} 
+              directoryList={this.state.directoryList}
               user={this.state.userToken} 
               openNote={this.state.openNote}
               handleSuccess={this.handleCRUDSuccess}s

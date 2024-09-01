@@ -22,7 +22,6 @@
     "firebase": "^10.8.1",
     "lodash": "^4.17.21",
     "mui-color-input": "^2.0.1",
-    "mui-datatables": "^4.3.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-phone-number-input": "^3.4.3",

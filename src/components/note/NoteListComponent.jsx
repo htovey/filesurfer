@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import DataGrid from '../datagrid/DataGrid';
+import FetchUtil from "../../utils/FetchUtil.js";
 
 export default function NoteListComponent(props) {
     const columns = [
@@ -8,7 +9,7 @@ export default function NoteListComponent(props) {
             headerName: ""
         },
         {
-            field: "noteId",
+            field: "id",
             headerName: "Note Id",
             options: {
                 display: 'excluded'
@@ -102,11 +103,12 @@ export default function NoteListComponent(props) {
   
     const handleDelete = (selectedRows) => {
         // this.setState({loading: true});
-        var url = '/delete';
+        var baseUrl = import.meta.env.VITE_API_URL || 'http://18.191.225.26:8181';
+        var url = baseUrl+'/delete';
         var payload = getIdList(selectedRows)
         // eslint-disable-next-line no-unused-vars
        // props.setLoading(true);
-        var result = FetchUtil.handlePost(url, props.userToken, JSON.stringify(payload))
+        var result = FetchUtil.handlePost(url, props.userToken, payload)
         .then(response => {
             if (response.status === 200) {
                 //this.setState({loading : false});
@@ -131,6 +133,8 @@ export default function NoteListComponent(props) {
         add: create,
         edit: edit,
         delete: deleteNotes,
+        customFunction1: props.openDirectoryForm,
+        customFunction1Name: 'Load Local DirectoryList',
         editTooltip: 'Edit Note',
         deleteTooltip: 'Delete Note',
         addTooltip: 'Create Note',
@@ -150,7 +154,7 @@ export default function NoteListComponent(props) {
                 headerRowData={headerRow}
                 noData={"no existing Notes"}
                 gridOptions={gridOptions}
-                rows={props.notes}
+                rows={props.noteList}
                 rowClass="grid-row"
                 setSelectedRows={setSelectedRows}
                 selectedRows={selectedRows}

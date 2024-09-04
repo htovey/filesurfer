@@ -14,12 +14,14 @@ import Tooltip from "@mui/material/Tooltip";
 import WaitModalComponent from './components/modals/WaitModalComponent';
 import Button from '@mui/material/Button';
 import CategoryComponent from './components/category/CategoryComponent';
+import DirectoryFormDialog from "./components/directory/DirectoryFormDialog";
 
 class App extends Component {
   constructor() {
     super();
     this.state = {
       noteList: [],
+      openDirectoryForm: false,
       openLogin: true,
       openNote: false,
       showNoteList: false,
@@ -262,22 +264,32 @@ class App extends Component {
     });
   } 
 
-  getDirectoryList = async () => {
+  openDirectory = () => {
+    this.setState({openDirectoryForm: true});
+  }
+
+  closeDirectoryForm = () => {
+    this.setState({openDirectoryForm: false});
+  }
+
+  getDirectoryListing = async (folder) => {
     const url = import.meta.env.VITE_API_URL || 'http://18.191.225.26:8181';
     const directoryUrl = url+"/directoryListing";
-    let params = { "folderName" : "/Users/heather" }; 
+    let params = { "folderName" : folder };
     let directories = await FetchUtil.handleNewGet(directoryUrl, params, this.state.userToken);
     if (directories.error) {
       this.handleError('womp womp');
     } else {
+      this.handleCRUDSuccess('Get Directory');
       this.setState({directoryList: directories});
+      this.closeDirectoryForm();
     }
   }
 
   setShowNoteForm = async (value) => {
-    if (value == true) {
-      await this.getDirectoryList();
-    }
+    // if (value == true) {
+    //   await this.getDirectoryList();
+    // }
     this.setState({openNote: value});
   }
 
@@ -309,7 +321,8 @@ class App extends Component {
             <NoteListComponent 
               getNoteFormData={this.getNoteFormData}
               handleSuccess={this.handleCRUDSuccess} 
-              notes={this.state.noteList}
+              noteList={this.state.noteList}
+              openDirectoryForm={this.openDirectory}
               setActionType={this.setActionType}
               setSelectedRows={this.setSelectedRows}
               userToken={this.state.userToken} 
@@ -334,7 +347,14 @@ class App extends Component {
               handleClose={this.closeCategory}
               categoryModel={this.state.categoryModel}
             />
-            }   
+            }
+          {this.state.openDirectoryForm &&
+            <DirectoryFormDialog
+              handleSubmit={this.getDirectoryListing}
+              openDirectoryForm={this.state.openDirectoryForm}
+              handleClose={this.closeDirectoryForm}
+            />
+          }
         </div>
 
     );

@@ -93,6 +93,8 @@ class DataGrid extends Component {
                     search={this.search}
                     clearSearch={this.clearSearch}
                     overrideLaunch={this.props.overrideLaunch}
+                    function1={this.props.gridOptions.customFunction1}
+                    funtion1Name={this.props.gridOptions.customFunction1Name}
                 />
                 <div role="grid" style={{gridTemplateColumns: `40px repeat(${this.props.columns.length-1}, auto)`}}>
                     <GridHeader 

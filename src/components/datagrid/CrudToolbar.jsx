@@ -8,6 +8,7 @@ import EditRoundedIcon from '@mui/icons-material/EditRounded';
 import {LaunchIcon} from '@mui/icons-material/Launch';
 import Toolbar from '@mui/material/Toolbar';
 import Search from '../actions/search';
+import Button from "@mui/material/Button";
 
 
 export default function CrudToolbar (props) {
@@ -56,6 +57,13 @@ export default function CrudToolbar (props) {
                     </IconButton>
                 </span>   
             </Tooltip>
+            {props.function1 !== undefined &&
+                <Button
+                    children={"Load Local Directory"}
+                    className="iconButton"
+                    onClick={props.function1}
+                />
+            }
             <span className='data-grid-title'>{props.options.title}</span>
             {props.useSearch &&                 
                 <Search 
